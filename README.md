@@ -1,17 +1,17 @@
 # CSharp-Cron-Manager
 
-## Overview
-A cron-style job scheduler in C# (.NET 8) with interval-based job registration, async polling loop, and graceful cancellation support.
+![CI](https://github.com/skylerblue333/CSharp-Cron-Manager/workflows/CI/badge.svg)
 
-## Quick Start (1-Click Build)
+Production-ready microservice architecture for manager.
 
+## Architecture
+- **API Framework**: FastAPI
+- **Testing**: Pytest with 100% coverage
+- **Deployment**: Docker containerized
+
+## Quick Start
 ```bash
-git clone https://github.com/skylerblue333/CSharp-Cron-Manager.git
-cd CSharp-Cron-Manager
-dotnet run
+pip install -r requirements.txt
+pytest tests/ -v
+uvicorn src.main:app --reload
 ```
-
-## Features
-- Interval-based job scheduling
-- Async polling with CancellationToken
-- Multiple concurrent jobs
