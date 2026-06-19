@@ -1,75 +1,33 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using System.Text.Json;
+using System.Collections.Concurrent;
 
-namespace CronManager
-{
-    public class ScheduledJob
-    {
-        public string Name { get; }
-        public int IntervalSeconds { get; }
-        public Action Action { get; }
-        public DateTime LastRun { get; private set; }
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
 
-        public ScheduledJob(string name, int intervalSeconds, Action action)
-        {
-            Name = name;
-            IntervalSeconds = intervalSeconds;
-            Action = action;
-            LastRun = DateTime.MinValue;
-        }
+var jobs = new ConcurrentDictionary<string, object>();
 
-        public bool IsDue() => (DateTime.UtcNow - LastRun).TotalSeconds >= IntervalSeconds;
+app.MapPost("/api/v1/jobs", async (HttpContext context) => {
+    using var doc = await JsonDocument.ParseAsync(context.Request.Body);
+    var root = doc.RootElement;
+    var id = Guid.NewGuid().ToString("N")[..8];
+    var job = new {
+        id,
+        name = root.TryGetProperty("name", out var n) ? n.GetString() : "unnamed",
+        schedule = root.TryGetProperty("schedule", out var s) ? s.GetString() : "0 * * * *",
+        command = root.TryGetProperty("command", out var c) ? c.GetString() : "",
+        created_at = DateTimeOffset.UtcNow
+    };
+    jobs[id] = job;
+    await context.Response.WriteAsJsonAsync(new { status = "created", job });
+});
 
-        public void Run()
-        {
-            LastRun = DateTime.UtcNow;
-            Action();
-        }
-    }
+app.MapGet("/api/v1/jobs", () => jobs.Values.ToArray());
+app.MapDelete("/api/v1/jobs/{id}", (string id) => {
+    jobs.TryRemove(id, out _);
+    return Results.Ok(new { status = "deleted", id });
+});
+app.MapGet("/health", () => new { status = "healthy" });
 
-    public class CronScheduler
-    {
-        private readonly List<ScheduledJob> _jobs = new();
-        private bool _running;
-
-        public void Register(ScheduledJob job) => _jobs.Add(job);
-
-        public async Task StartAsync(CancellationToken ct)
-        {
-            _running = true;
-            Console.WriteLine("[Scheduler] Started. Polling every 1s...\n");
-            while (_running && !ct.IsCancellationRequested)
-            {
-                foreach (var job in _jobs)
-                {
-                    if (job.IsDue())
-                    {
-                        Console.WriteLine($"[{DateTime.UtcNow:HH:mm:ss}] Running: {job.Name}");
-                        job.Run();
-                    }
-                }
-                await Task.Delay(1000, ct);
-            }
-        }
-    }
-
-    class Program
-    {
-        static async Task Main()
-        {
-            var scheduler = new CronScheduler();
-
-            scheduler.Register(new ScheduledJob("HealthCheck", 2, () =>
-                Console.WriteLine("  -> Health check passed.")));
-
-            scheduler.Register(new ScheduledJob("MetricsFlush", 4, () =>
-                Console.WriteLine("  -> Metrics flushed to time-series DB.")));
-
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            await scheduler.StartAsync(cts.Token);
-            Console.WriteLine("\n[Scheduler] Stopped.");
-        }
-    }
-}
+app.Run("http://0.0.0.0:8080");
