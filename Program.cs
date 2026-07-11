@@ -1,3 +1,12 @@
 using System;
 public class Cron { public bool IsDue() { return true; } }
-Console.WriteLine("Starting CSharp-Cron-Manager");
+namespace CSharp_Cron_Manager
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Starting CSharp-Cron-Manager");
+        }
+    }
+}
