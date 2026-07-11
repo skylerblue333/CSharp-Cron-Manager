@@ -1,34 +1,16 @@
 # CSharp-Cron-Manager
+![CI Status](https://github.com/skylerblue333/CSharp-Cron-Manager/actions/workflows/ci.yml/badge.svg)
 
-Cron-style job scheduler with expression parsing in C#.
+## Overview
+A robust C#-based Cron Job Manager designed for enterprise-scale task scheduling within the SKYCOIN4444 ecosystem.
 
-## 🚀 Overview
-This repository contains a professional implementation of **CSharp Cron Manager**. It is designed with clean code principles and focuses on functionality and reliability.
+## Features
+- **Flexible Scheduling**: Supports complex cron expressions.
+- **High Reliability**: Built for mission-critical background tasks.
+- **Enterprise Integration**: Seamlessly connects with SkyCore services.
 
-## 🛠️ Tech Stack
-- **Primary Language**: CSharp
-- **Environment**: Node.js / Python / Rust (as applicable)
-- **Key Features**: 
-  - Modular architecture
-  - Clean implementation of core logic
-  - Scalable design
+## CI/CD
+Automated builds and testing via GitHub Actions.
 
-## 📂 Getting Started
-
-### Prerequisites
-- Ensure you have the latest version of the relevant runtime (Node.js, Python, or Rust) installed.
-
-### Installation
-```bash
-git clone https://github.com/skylerblue333/CSharp-Cron-Manager.git
-cd CSharp-Cron-Manager
-```
-
-### Usage
-Follow the specific language conventions to run the project (e.g., `npm install`, `cargo build`, or `pip install -r requirements.txt`).
-
-## 🛡️ License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-Built by [Skyler Blue](https://github.com/skylerblue333)
+## License
+MIT License
