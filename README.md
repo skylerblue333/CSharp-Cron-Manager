@@ -1,44 +1,49 @@
-<!-- PORTFOLIO PROJECT PROFILE: maintained by the repository owner -->
+# Sky Schedule
 
-## Project profile and code-audit snapshot
+**Status: engineering beta.** A focused .NET 8 schedule-expression parser and UTC next-run calculator for predictable application scheduling boundaries.
 
-**What this is:** **CSharp-Cron-Manager** is a public repository described as: “Cron-style job scheduler with expression parsing in C#. #SkyCoin4444 #AI #Blockchain #DevOps #Innovation” Its dominant language signals are **C# (1 files)**.
+## Implemented behavior
 
-**Why it has value:** Its value is best understood through the implementation evidence currently present in the repository: **14 tracked files** were observed in the shallow audit, with the source structure and existing documentation providing the project’s specific context. This README does not treat a prototype, experiment, or archive as a production system without supporting evidence.
+- parses five-field cron-style expressions: minute, hour, day-of-month, month, day-of-week
+- supports `*`, exact numeric values, comma-separated values, ranges, and `*/N` step values
+- validates field bounds before evaluation
+- computes the first matching UTC minute strictly after a supplied timestamp
+- uses a bounded search horizon instead of looping forever on impossible schedules
+- emits machine-readable JSON from the CLI
+- includes xUnit coverage for parsing, steps, ranges, invalid expressions, and deterministic next-run calculation
+- CI verifies .NET 8 restore/build/tests, package vulnerability reporting, CLI behavior, Docker build, and non-root runtime packaging
 
-**Implementation evidence:** No test-related file was detected by filename heuristics.; 2 dependency or package manifest(s) detected; 1 build/CI/infrastructure signal(s) detected; and 3 documentation or governance file(s) detected. Test filenames observed include none detected. Dependency or package files include `CSharp-Cron-Manager.csproj`, `package.json`. Build, CI, or infrastructure signals include `.github/workflows/ci.yml`.
+## Run
 
-**Current status:** The repository is tracked on the `main` branch. The existing source tree, configuration, tests, workflows, and documentation remain authoritative for supported behavior and maturity. A code audit is not a production-readiness certification, and the presence of a test or workflow file does not establish that all checks pass.
+```bash
+dotnet restore tests/SkySchedule.Tests.csproj
+dotnet test tests/SkySchedule.Tests.csproj -c Release
+dotnet run --project CSharp-Cron-Manager.csproj -- '*/15 * * * *' '2026-08-24T10:07:59Z'
+```
 
-**Relationship to the wider portfolio:** This repository is one focused component of the broader Skyler Blue Spillers portfolio across AI, software engineering, cloud and DevOps, cybersecurity, blockchain, finance, education, social systems, and creative work. It may provide a service boundary, implementation pattern, experiment, archive, or reusable idea for related repositories. Treat repositories as technical dependencies only where documented interfaces and verified project requirements support that relationship.
+Example output:
 
-**Quality and security note:** No obvious secret-like pattern was detected by the limited static scan; this is not a substitute for a security audit. No TODO/FIXME marker was detected in the scanned text files.
+```json
+{"expression":"*/15 * * * *","after":"2026-08-24T10:07:59+00:00","nextRun":"2026-08-24T10:15:00+00:00","timezone":"UTC"}
+```
 
----
+## Container
 
-# Csharp Cron Manager
+```bash
+docker build -t sky-schedule .
+docker run --rm sky-schedule '0 9 * * 1-5' '2026-08-24T10:07:59Z'
+```
 
-![GitHub stars](https://img.shields.io/github/stars/skylerblue333/CSharp-Cron-Manager?style=flat-square)
-![GitHub license](https://img.shields.io/github/license/skylerblue333/CSharp-Cron-Manager?style=flat-square)
+The runtime image executes as UID `10001` through the unprivileged `app` user.
 
-## 🌟 Overview
-**CSharp-Cron-Manager** is a professional-grade project within the **SkyCoin4444** ecosystem. It focuses on delivering high-value solutions in the domain of **Software Development**.
+## SKYCOIN4444 integration
 
-## 🚀 Key Features
-- **Scalable Architecture**: Designed for enterprise-level growth and performance.
-- **Modern Standards**: Implements best practices for clean code and maintainability.
-- **Robust Integration**: Built to work seamlessly within modern cloud-native environments.
+Sky Schedule can be used as a deterministic scheduling primitive for workers, notification planning, maintenance windows, report generation, or workflow orchestration. A production scheduler should consume this library/CLI through an explicit adapter rather than assuming this repository itself owns durable jobs or execution.
 
-## 🛠️ Technology Stack
-- **Primary Domain**: Software Development
-- **Ecosystem**: SkyCoin4444 Digital Platform
+## Explicit limitations
 
-## 📂 Structure
-The project is organized into a modular structure to ensure clarity and ease of development.
+This repository is **not** a distributed scheduler, job queue, durable cron daemon, workflow engine, Kubernetes CronJob controller, or managed scheduling service. It does not persist jobs, execute arbitrary commands, coordinate multiple nodes, provide retries, locks, leases, HA, tenant isolation, authorization, timezone databases, or production deployment.
 
-## 👨‍💻 Author
-**Skyler Blue Spillers**
-*Professional Chess Player & Software Engineer*
+Evaluation is intentionally UTC-only. If local-time scheduling is required, the integrating service must convert an approved timezone-aware instant to UTC before evaluation and handle daylight-saving semantics explicitly.
 
----
-*Powered by SkyCoin4444*
+See `SECURITY.md` and `CHANGELOG.md` for boundaries and productization history.
