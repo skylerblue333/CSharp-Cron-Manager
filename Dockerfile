@@ -7,7 +7,6 @@ RUN dotnet publish CSharp-Cron-Manager.csproj -c Release --no-restore -o /out /p
 
 FROM mcr.microsoft.com/dotnet/runtime:8.0
 WORKDIR /app
-RUN groupadd --system app && useradd --system --gid app --uid 10001 app
 COPY --from=build --chown=app:app /out ./
 USER app
-ENTRYPOINT ["dotnet", "CSharp-Cron-Manager.dll"]
+ENTRYPOINT ["dotnet", "SkySchedule.dll"]
