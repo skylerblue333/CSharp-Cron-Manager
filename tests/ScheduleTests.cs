@@ -1,4 +1,5 @@
 using SkySchedule;
+using Xunit;
 
 namespace SkySchedule.Tests;
 
